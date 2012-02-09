@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
@@ -28,14 +27,10 @@ func validateimage(h *multipart.FileHeader) (ext string, err error) {
 	mime := mimeArray[0]
 	if mime == "image/jpeg" {
 		ext = ".jpg"
-		fmt.Println("it's a jpg!")
 	} else if mime == "image/png" {
 		ext = ".png"
-		fmt.Println("it's a png!")
 	} else {
 		err = errors.New("Unsupported filetype uploaded")
-		fmt.Println("idk what it is!")
-		fmt.Println(mime)
 	}
 	return
 }
@@ -52,13 +47,10 @@ func upload(w http.ResponseWriter, r *http.Request) {
 	f, h, err := r.FormFile("image")
 	check(err)
 	defer f.Close()
-	fmt.Println("got image, now validating...")
 
 	// Check MIME and get a file extension
 	ext, err := validateimage(h)
 	check(err)
-
-	fmt.Println("validated..." + ext)
 
 	// Read and write the uploaded file to disk
 	filename := "./img/" + h.Filename
