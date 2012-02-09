@@ -56,7 +56,7 @@ func upload(w http.ResponseWriter, r *http.Request) {
 	filename := "./img/" + h.Filename
 	filebytes, err := ioutil.ReadAll(f)
 	check(err)
-	err = ioutil.WriteFile(filename, filebytes, 0777)
+	err = ioutil.WriteFile(filename, filebytes, 0744)
 	check(err)
 
 	// Redirect to the view page
