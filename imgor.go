@@ -49,7 +49,7 @@ func upload(w http.ResponseWriter, r *http.Request) {
 	defer f.Close()
 
 	// Check MIME and get a file extension
-	ext, err := validateimage(h)
+	_, err = validateimage(h)
 	check(err)
 
 	// Read and write the uploaded file to disk
@@ -77,13 +77,19 @@ func view(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, filename)
 }
 
-// Error wrapper
+// Error page's variables
+type ErrorPage struct {
+	Error error
+}
+
+// One clean error page
 func errorHandler(fn http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if e, ok := recover().(error); ok {
+				contents := ErrorPage{Error: e}
 				w.WriteHeader(http.StatusInternalServerError)
-				errorTemplate.Execute(w, e)
+				errorTemplate.Execute(w, contents)
 			}
 		}()
 		fn(w, r)
