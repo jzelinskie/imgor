@@ -17,8 +17,8 @@ func check(err error) {
 
 // Page Templates
 var (
-	uploadTemplate, _ = template.ParseFiles("upload.html")
-	errorTemplate, _  = template.ParseFiles("error.html")
+	uploadTemplate *template.Template
+	errorTemplate  *template.Template
 )
 
 // MIME Validator
@@ -97,6 +97,14 @@ func errorHandler(fn http.HandlerFunc) http.HandlerFunc {
 }
 
 func main() {
+	var err error
+
+	// Load up templates and check for errors
+	uploadTemplate, err = template.ParseFiles("upload.html")
+	check(err)
+	errorTemplate, err = template.ParseFiles("error.html")
+	check(err)
+
 	http.HandleFunc("/", errorHandler(upload))
 	http.HandleFunc("/view", errorHandler(view))
 	http.ListenAndServe(":3000", nil)
