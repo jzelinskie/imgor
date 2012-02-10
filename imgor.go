@@ -1,11 +1,25 @@
+/*
+ * imgor
+ * Copyright (c) 2012 Jimmy Zelinskie
+ * Licensed under the MIT license.
+ */
+
 package main
 
 import (
+  "os"
 	"errors"
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"text/template"
+)
+
+// Globals
+var (
+	uploadTemplate *template.Template
+	errorTemplate  *template.Template
+	imgdir         string
 )
 
 // Check for errors
@@ -14,13 +28,6 @@ func check(err error) {
 		panic(err)
 	}
 }
-
-// Page Templates
-var (
-	uploadTemplate *template.Template
-	errorTemplate  *template.Template
-	imgdir         string
-)
 
 // MIME Validator
 func validateimage(h *multipart.FileHeader) (ext string, err error) {
@@ -100,8 +107,9 @@ func errorHandler(fn http.HandlerFunc) http.HandlerFunc {
 func main() {
 	var err error
 
-	// Set imgdir
+	// Set imgdir and make sure it exists!
 	imgdir = "./img/"
+  _ = os.Mkdir(imgdir[2:len(imgdir)-l]
 
 	// Load up templates and check for errors
 	uploadTemplate, err = template.ParseFiles("upload.html")
