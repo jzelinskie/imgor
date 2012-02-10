@@ -19,6 +19,7 @@ func check(err error) {
 var (
 	uploadTemplate *template.Template
 	errorTemplate  *template.Template
+	imgdir         string
 )
 
 // MIME Validator
@@ -45,15 +46,15 @@ func upload(w http.ResponseWriter, r *http.Request) {
 
 	// Get image from POST
 	f, h, err := r.FormFile("image")
-	check(err)
 	defer f.Close()
+	check(err)
 
 	// Check MIME and get a file extension
 	_, err = validateimage(h)
 	check(err)
 
 	// Read and write the uploaded file to disk
-	filename := "./img/" + h.Filename
+	filename := imgdir + h.Filename
 	filebytes, err := ioutil.ReadAll(f)
 	check(err)
 	err = ioutil.WriteFile(filename, filebytes, 0744)
@@ -66,7 +67,7 @@ func upload(w http.ResponseWriter, r *http.Request) {
 // View Handler
 func view(w http.ResponseWriter, r *http.Request) {
 	var filename string
-	filename = "./img/" + r.FormValue("id")
+	filename = imgdir + r.FormValue("id")
 
 	if filename[len(filename)-4:] == ".jpg" {
 		w.Header().Set("Content-Type", "image/jpeg")
@@ -98,6 +99,9 @@ func errorHandler(fn http.HandlerFunc) http.HandlerFunc {
 
 func main() {
 	var err error
+
+	// Set imgdir
+	imgdir = "./img/"
 
 	// Load up templates and check for errors
 	uploadTemplate, err = template.ParseFiles("upload.html")
