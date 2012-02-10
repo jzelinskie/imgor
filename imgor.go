@@ -109,7 +109,7 @@ func main() {
 
 	// Set imgdir and make sure it exists!
 	imgdir = "./img/"
-  _ = os.Mkdir(imgdir[2:len(imgdir)-l]
+  _ = os.Mkdir(imgdir[2:len(imgdir)-l])
 
 	// Load up templates and check for errors
 	uploadTemplate, err = template.ParseFiles("upload.html")
