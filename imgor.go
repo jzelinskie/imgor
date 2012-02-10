@@ -7,11 +7,11 @@
 package main
 
 import (
+	"crypto/sha1"
 	"errors"
-  "crypto/sha1"
+	"fmt"
 	"io/ioutil"
 	"mime/multipart"
-  "fmt"
 	"net/http"
 	"os"
 	"text/template"
@@ -32,8 +32,8 @@ func check(err error) {
 }
 
 func generatefilename(d []byte) string {
-  sha := sha1.New()
-  return fmt.Sprintf("%x", string(sha.Sum(d))[0:10])
+	sha := sha1.New()
+	return fmt.Sprintf("%x", string(sha.Sum(d))[0:10])
 }
 
 // MIME Validator
@@ -64,13 +64,13 @@ func upload(w http.ResponseWriter, r *http.Request) {
 	check(err)
 
 	// Check MIME and get a file extension
-  ext, err := validateimage(h)
+	ext, err := validateimage(h)
 	check(err)
 
 	// Read and write the uploaded file to disk
 	filebytes, err := ioutil.ReadAll(f)
 	check(err)
-  filename := imgdir + generatefilename(filebytes) + ext
+	filename := imgdir + generatefilename(filebytes) + ext
 	err = ioutil.WriteFile(filename, filebytes, 0744)
 	check(err)
 
@@ -83,13 +83,13 @@ func view(w http.ResponseWriter, r *http.Request) {
 	var filename string
 	filename = imgdir + r.FormValue("id")
 
-  if filename[len(filename)-3:] == "jpg" {
+	if filename[len(filename)-3:] == "jpg" {
 		w.Header().Set("Content-Type", "image/jpeg")
-  } else if filename[len(filename)-3:] == "png" {
+	} else if filename[len(filename)-3:] == "png" {
 		w.Header().Set("Content-Type", "image/png")
 	} else {
-    panic(errors.New("No supported filetype specified"))
-  }
+		panic(errors.New("No supported filetype specified"))
+	}
 
 	http.ServeFile(w, r, filename)
 }
@@ -118,7 +118,7 @@ func main() {
 
 	// Set imgdir and make sure it exists!
 	imgdir = "./img/"
-	_ = os.Mkdir(imgdir[2 : len(imgdir)-1], 0744)
+	_ = os.Mkdir(imgdir[2:len(imgdir)-1], 0744)
 
 	// Load up templates and check for errors
 	uploadTemplate, err = template.ParseFiles("upload.html")
