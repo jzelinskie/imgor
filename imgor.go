@@ -22,6 +22,7 @@ var (
 	uploadTemplate *template.Template
 	errorTemplate  *template.Template
 	imgdir         string
+	templatedir    string
 )
 
 // Check for errors
@@ -121,9 +122,10 @@ func main() {
 	_ = os.Mkdir(imgdir[2:len(imgdir)-1], 0744)
 
 	// Load up templates and check for errors
-	uploadTemplate, err = template.ParseFiles("upload.html")
+	templatedir = "./templates/"
+	uploadTemplate, err = template.ParseFiles(templatedir + "upload.html")
 	check(err)
-	errorTemplate, err = template.ParseFiles("error.html")
+	errorTemplate, err = template.ParseFiles(templatedir + "error.html")
 	check(err)
 
 	http.HandleFunc("/", errorHandler(upload))
