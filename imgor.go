@@ -58,6 +58,15 @@ func validateimage(h *multipart.FileHeader) (ext string, err error) {
 	return
 }
 
+// Root Handler
+func root(w http.ResponseWriter, r *http.Request) {
+	if string(r.URL.Path) == "/styles.css" {
+		static(templatedir+"styles.css", w, r)
+	} else {
+		upload(w, r)
+	}
+}
+
 // Upload Handler
 func upload(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
@@ -105,6 +114,18 @@ func view(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, filename)
 }
 
+// Serve a static file
+func static(filename string, w http.ResponseWriter, r *http.Request) {
+	// Set MIME
+	w.Header().Set("Content-Type", "text/css")
+
+	// Set expire headers to now + 1 year
+	yearlater := time.Now().AddDate(1, 0, 0)
+	w.Header().Set("Expires", yearlater.Format(http.TimeFormat))
+
+	http.ServeFile(w, r, filename)
+}
+
 // One clean error page
 func errorHandler(fn http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -120,20 +141,19 @@ func errorHandler(fn http.HandlerFunc) http.HandlerFunc {
 }
 
 func main() {
-	var err error
-
 	// Set imgdir and make sure it exists!
 	imgdir = "./img/"
 	_ = os.Mkdir(imgdir[2:len(imgdir)-1], 0744)
 
 	// Load up templates and check for errors
+	var err error
 	templatedir = "./templates/"
 	uploadTemplate, err = template.ParseFiles(templatedir + "upload.html")
 	check(err)
 	errorTemplate, err = template.ParseFiles(templatedir + "error.html")
 	check(err)
 
-	http.HandleFunc("/", errorHandler(upload))
+	http.HandleFunc("/", errorHandler(root))
 	http.HandleFunc("/view/", errorHandler(view))
 	http.ListenAndServe(":3000", nil)
 }
