@@ -15,6 +15,7 @@ import (
 	"net/http"
 	"os"
 	"text/template"
+	"time"
 )
 
 // Globals
@@ -32,6 +33,7 @@ func check(err error) {
 	}
 }
 
+// Generate a random filename using a sha1 of the image
 func generatefilename(d []byte) string {
 	sha := sha1.New()
 	return fmt.Sprintf("%x", string(sha.Sum(d))[0:10])
@@ -91,6 +93,10 @@ func view(w http.ResponseWriter, r *http.Request) {
 	} else {
 		panic(errors.New("No supported filetype specified"))
 	}
+
+	// Set expire headers to now+ 1 year
+	yearlater := time.Now().AddDate(1, 0, 0)
+	w.Header().Set("Expires", yearlater.Format(http.TimeFormat))
 
 	http.ServeFile(w, r, filename)
 }
