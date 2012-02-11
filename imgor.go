@@ -26,6 +26,11 @@ var (
 	templatedir    string
 )
 
+// Error page's variables
+type ErrorPage struct {
+	Error error
+}
+
 // Check for errors
 func check(err error) {
 	if err != nil {
@@ -78,13 +83,12 @@ func upload(w http.ResponseWriter, r *http.Request) {
 	check(err)
 
 	// Redirect to the view page
-	http.Redirect(w, r, "/view?id="+filename[6:], http.StatusFound)
+	http.Redirect(w, r, "/view/"+filename[6:], http.StatusFound)
 }
 
 // View Handler
 func view(w http.ResponseWriter, r *http.Request) {
-	var filename string
-	filename = imgdir + r.FormValue("id")
+	filename := string(imgdir + r.URL.Path[len("view/"):])
 
 	if filename[len(filename)-3:] == "jpg" {
 		w.Header().Set("Content-Type", "image/jpeg")
@@ -94,16 +98,11 @@ func view(w http.ResponseWriter, r *http.Request) {
 		panic(errors.New("No supported filetype specified"))
 	}
 
-	// Set expire headers to now+ 1 year
+	// Set expire headers to now + 1 year
 	yearlater := time.Now().AddDate(1, 0, 0)
 	w.Header().Set("Expires", yearlater.Format(http.TimeFormat))
 
 	http.ServeFile(w, r, filename)
-}
-
-// Error page's variables
-type ErrorPage struct {
-	Error error
 }
 
 // One clean error page
@@ -135,6 +134,6 @@ func main() {
 	check(err)
 
 	http.HandleFunc("/", errorHandler(upload))
-	http.HandleFunc("/view", errorHandler(view))
+	http.HandleFunc("/view/", errorHandler(view))
 	http.ListenAndServe(":3000", nil)
 }
