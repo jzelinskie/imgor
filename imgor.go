@@ -61,15 +61,9 @@ func validateimage(h *multipart.FileHeader) (ext string, err error) {
 // Root/Upload Handler
 func upload(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		if r.URL.Path != "/" {
-			// Serve static files
-			serveStatic(staticdir+r.URL.Path[1:], w, r)
-			return
-		} else {
-			// Load the upload page if they aren't posting an image
-			uploadTemplate.Execute(w, nil)
-			return
-		}
+		// Load the upload page if they aren't posting an image
+		uploadTemplate.Execute(w, nil)
+		return
 	}
 
 	// Get image from POST
@@ -92,6 +86,23 @@ func upload(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/view/"+filename[6:], http.StatusFound)
 }
 
+// Serve static files
+func static(w http.ResponseWriter, r *http.Request) {
+	filename := string(staticdir + r.URL.Path[8:])
+	fmt.Println(filename)
+
+	// Set MIME
+	if filename[len(filename)-3:] == ".css" {
+		w.Header().Set("Content-Type", "text/css")
+	}
+
+	// Set expire headers to now + 1 year
+	yearLater := time.Now().AddDate(1, 0, 0)
+	w.Header().Set("Expires", yearLater.Format(http.TimeFormat))
+
+	http.ServeFile(w, r, filename)
+}
+
 // View Handler
 func view(w http.ResponseWriter, r *http.Request) {
 	filename := string(imgdir + r.URL.Path[5:])
@@ -104,18 +115,6 @@ func view(w http.ResponseWriter, r *http.Request) {
 	} else {
 		panic(errors.New("No supported filetype specified"))
 	}
-
-	// Set expire headers to now + 1 year
-	yearLater := time.Now().AddDate(1, 0, 0)
-	w.Header().Set("Expires", yearLater.Format(http.TimeFormat))
-
-	http.ServeFile(w, r, filename)
-}
-
-// Serve a static file
-func serveStatic(filename string, w http.ResponseWriter, r *http.Request) {
-	// Set MIME
-	w.Header().Set("Content-Type", "text/css")
 
 	// Set expire headers to now + 1 year
 	yearLater := time.Now().AddDate(1, 0, 0)
@@ -153,5 +152,6 @@ func main() {
 
 	http.HandleFunc("/", errorHandler(upload))
 	http.HandleFunc("/view/", errorHandler(view))
+	http.HandleFunc("/static/", errorHandler(static))
 	http.ListenAndServe(":3000", nil)
 }
