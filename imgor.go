@@ -23,7 +23,7 @@ var (
 	uploadTemplate *template.Template
 	errorTemplate  *template.Template
 	imgdir         string
-	templatedir    string
+	staticdir      string
 )
 
 // Error page's variables
@@ -58,21 +58,18 @@ func validateimage(h *multipart.FileHeader) (ext string, err error) {
 	return
 }
 
-// Root Handler
-func root(w http.ResponseWriter, r *http.Request) {
-	if string(r.URL.Path) == "/styles.css" {
-		static(templatedir+"styles.css", w, r)
-	} else {
-		upload(w, r)
-	}
-}
-
-// Upload Handler
+// Root/Upload Handler
 func upload(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		// Load the upload page if they aren't posting an image
-		uploadTemplate.Execute(w, nil)
-		return
+		if r.URL.Path != "/" {
+			// Serve static files
+			serveStatic(staticdir+r.URL.Path[1:], w, r)
+			return
+		} else {
+			// Load the upload page if they aren't posting an image
+			uploadTemplate.Execute(w, nil)
+			return
+		}
 	}
 
 	// Get image from POST
@@ -97,8 +94,9 @@ func upload(w http.ResponseWriter, r *http.Request) {
 
 // View Handler
 func view(w http.ResponseWriter, r *http.Request) {
-	filename := string(imgdir + r.URL.Path[len("view/"):])
+	filename := string(imgdir + r.URL.Path[5:])
 
+	// Set content-type headers
 	if filename[len(filename)-3:] == "jpg" {
 		w.Header().Set("Content-Type", "image/jpeg")
 	} else if filename[len(filename)-3:] == "png" {
@@ -108,20 +106,20 @@ func view(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Set expire headers to now + 1 year
-	yearlater := time.Now().AddDate(1, 0, 0)
-	w.Header().Set("Expires", yearlater.Format(http.TimeFormat))
+	yearLater := time.Now().AddDate(1, 0, 0)
+	w.Header().Set("Expires", yearLater.Format(http.TimeFormat))
 
 	http.ServeFile(w, r, filename)
 }
 
 // Serve a static file
-func static(filename string, w http.ResponseWriter, r *http.Request) {
+func serveStatic(filename string, w http.ResponseWriter, r *http.Request) {
 	// Set MIME
 	w.Header().Set("Content-Type", "text/css")
 
 	// Set expire headers to now + 1 year
-	yearlater := time.Now().AddDate(1, 0, 0)
-	w.Header().Set("Expires", yearlater.Format(http.TimeFormat))
+	yearLater := time.Now().AddDate(1, 0, 0)
+	w.Header().Set("Expires", yearLater.Format(http.TimeFormat))
 
 	http.ServeFile(w, r, filename)
 }
@@ -147,13 +145,13 @@ func main() {
 
 	// Load up templates and check for errors
 	var err error
-	templatedir = "./templates/"
-	uploadTemplate, err = template.ParseFiles(templatedir + "upload.html")
+	staticdir = "./static/"
+	uploadTemplate, err = template.ParseFiles(staticdir + "upload.html")
 	check(err)
-	errorTemplate, err = template.ParseFiles(templatedir + "error.html")
+	errorTemplate, err = template.ParseFiles(staticdir + "error.html")
 	check(err)
 
-	http.HandleFunc("/", errorHandler(root))
+	http.HandleFunc("/", errorHandler(upload))
 	http.HandleFunc("/view/", errorHandler(view))
 	http.ListenAndServe(":3000", nil)
 }
