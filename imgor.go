@@ -26,11 +26,6 @@ var (
 	staticdir      string
 )
 
-// Error page's variables
-type ErrorPage struct {
-	Error error
-}
-
 // Check for errors
 func check(err error) {
 	if err != nil {
@@ -127,10 +122,9 @@ func view(w http.ResponseWriter, r *http.Request) {
 func errorHandler(fn http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
-			if e, ok := recover().(error); ok {
-				contents := ErrorPage{Error: e}
+			if err, ok := recover().(error); ok {
 				w.WriteHeader(http.StatusInternalServerError)
-				errorTemplate.Execute(w, contents)
+				errorTemplate.Execute(w, err)
 			}
 		}()
 		fn(w, r)
