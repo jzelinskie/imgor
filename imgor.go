@@ -36,7 +36,8 @@ func check(err error) {
 // Generate a random filename using a sha1 of the image
 func generatefilename(d []byte) string {
 	sha := sha1.New()
-	return fmt.Sprintf("%x", string(sha.Sum(d))[0:10])
+	sha.Write(d)
+	return fmt.Sprintf("%x", sha.Sum(nil)[:10])
 }
 
 // MIME Validator
