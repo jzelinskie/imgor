@@ -1,0 +1,34 @@
+{{define "head"}}
+<title>imgor</title>
+<link href="/static/css/bootstrap.min.css" rel="stylesheet">
+<link href="/static/css/bootstrap.jumbotron.css" rel="stylesheet">
+{{end}}
+
+{{define "body"}}
+<div class="jumbotron masthead">
+  <div class="container">
+    <h1>imgor</h1>
+    <p><small>an image uploader</small></p>
+    <ul class="masthead-links">
+      <li><iframe class="github-btn" src="http://ghbtns.com/github-btn.html?user=jzelinskie&repo=imgor&type=watch&count=true" allowtransparency="true" frameborder="0" scrolling="0" width="100px" height="20px"></iframe></li>
+      <li><iframe class="github-btn" src="http://ghbtns.com/github-btn.html?user=jzelinskie&repo=imgor&type=fork&count=true" allowtransparency="true" frameborder="0" scrolling="0" width="102px" height="20px"></iframe></li>
+    </ul>
+  </div>
+</div>
+  <center>
+    <form action="/upload" method="post" enctype="multipart/form-data">
+      <input type="file" name="image" id="image">
+      <button class="btn" type="submit">upload</button>
+    </form>
+  </center>
+<footer class="footer">
+  <p>
+    imgor is written by <a href="http://jzelinskie.com">Jimmy Zelinskie</a> and is licensed under a BSD-style license
+  </p>
+  <ul class="footer-links">
+    <li><a href="https://github.com/jzelinskie/imgor/commits/master">changes</a></li>
+    <li class="muted">·</li>
+    <li><a href="http://golang.org">golang.org</a></li>
+  </ul>
+</footer>
+{{end}}
