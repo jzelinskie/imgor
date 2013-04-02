@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"crypto/sha1"
 	"errors"
 	"fmt"
@@ -49,8 +50,11 @@ func uniqueImageName(image []byte) (string, error) {
 
 // validateImage reads an image's headers to determine the type of image.
 func validateImage(image []byte) (mimetype, extension string, err error) {
-	if image[0] == 0xff && image[1] == 0xd8 {
+	if bytes.Equal(image[:2], []byte{0xff, 0xd8}) {
 		return "image/jpeg", "jpg", nil
+	}
+	if bytes.Equal(image[:8], []byte{0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a}) {
+		return "image/png", "png", nil
 	}
 	return "", "", errors.New("Unaccepted content type")
 }
