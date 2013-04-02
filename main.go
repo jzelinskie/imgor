@@ -56,6 +56,10 @@ func validateImage(image []byte) (mimetype, extension string, err error) {
 	if bytes.Equal(image[:8], []byte{0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a}) {
 		return "image/png", "png", nil
 	}
+	if bytes.Equal(image[:6], []byte{0x47, 0x49, 0x46, 0x38, 0x37, 0x61}) ||
+		bytes.Equal(image[:6], []byte{0x47, 0x49, 0x46, 0x38, 0x39, 0x61}) {
+		return "image/gif", "gif", nil
+	}
 	return "", "", errors.New("Unaccepted content type")
 }
 
